@@ -1,12 +1,10 @@
 from pycocotools import mask
-from skimage import measure
 import json
-import shutil
 import itertools
 import numpy as np
 from simplification.cutil import simplify_coords_vwp
-import os, cv2, copy
-from distinctipy import distinctipy
+import os, cv2
+from termcolor import colored
 
 
 def init_coco(dataset_folder, image_names, categories, coco_json_path):
@@ -96,6 +94,7 @@ class DatasetExplorer:
     def __init__(self, dataset_folder, categories=None, coco_json_path=None):
         self.dataset_folder = dataset_folder
         self.image_names = os.listdir(os.path.join(self.dataset_folder, "images"))
+        print(colored("Labeling {} images from directory {}".format(len(self.image_names), self.dataset_folder), "green")
         self.image_names = [
             os.path.split(name)[1]
             for name in self.image_names

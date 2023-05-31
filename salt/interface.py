@@ -1,26 +1,9 @@
-import cv2
-from PyQt5.QtWidgets import (
-    QScrollArea,
-    QWidget,
-    QVBoxLayout,
-    QLabel,
-    QGraphicsView,
-    QGraphicsScene,
-    QApplication,
-    QListWidget,
-    QListWidgetItem,
-    QAbstractItemView,
-)
-from PyQt5.QtGui import QImage, QPixmap, QPainter, QWheelEvent, QMouseEvent
-from PyQt5.QtCore import Qt, QRectF
-from PyQt5.QtWidgets import (
-    QPushButton,
-    QVBoxLayout,
-    QHBoxLayout,
-    QWidget,
-    QLabel,
-    QRadioButton,
-)
+from PyQt5.QtCore import QRectF, Qt
+from PyQt5.QtGui import QImage, QMouseEvent, QPainter, QPixmap, QWheelEvent
+from PyQt5.QtWidgets import (QAbstractItemView, QApplication, QGraphicsScene,
+                             QGraphicsView, QHBoxLayout, QListWidget,
+                             QListWidgetItem, QPushButton, QRadioButton,
+                             QScrollArea, QVBoxLayout, QWidget)
 
 selected_annotations = []
 

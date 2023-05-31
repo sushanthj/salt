@@ -7,7 +7,7 @@ import warnings
 import os, shutil
 import argparse
 
-from segment_anything import sam_model_registry, SamPredictor
+from segment_anything import sam_model_registry
 from segment_anything.utils.onnx import SamOnnxModel
 
 from onnxruntime.quantization import QuantType
@@ -16,7 +16,8 @@ from onnxruntime.quantization.quantize import quantize_dynamic
 import cv2
 import torch
 
-def save_onnx_model(checkpoint, model_type, onnx_model_path, orig_im_size, opset_version, quantize = True):
+
+def save_onnx_model(checkpoint, model_type, onnx_model_path, orig_im_size, opset_version, quantize=True):
     sam = sam_model_registry[model_type](checkpoint=checkpoint)
 
     onnx_model = SamOnnxModel(sam, return_single_mask=True)
@@ -69,6 +70,7 @@ def save_onnx_model(checkpoint, model_type, onnx_model_path, orig_im_size, opset
         )
         os.remove(temp_model_path)
 
+
 def main(checkpoint_path, model_type, onnx_models_path, dataset_path, opset_version, quantize):
     if not os.path.exists(onnx_models_path):
         os.makedirs(onnx_models_path)
@@ -85,6 +87,7 @@ def main(checkpoint_path, model_type, onnx_models_path, dataset_path, opset_vers
     for orig_im_size in im_sizes:
         onnx_model_path = os.path.join(onnx_models_path, f"sam_onnx.{orig_im_size[0]}_{orig_im_size[1]}.onnx")
         save_onnx_model(checkpoint_path, model_type, onnx_model_path, orig_im_size, opset_version, quantize)
+
 
 if __name__ == "__main__":
 

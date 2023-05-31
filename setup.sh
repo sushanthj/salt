@@ -32,11 +32,12 @@ fi
 # Extract the embeddings, if they don't exist already
 if [ ! -d "$1/embeddings" ]; then
   echo -e "${NC}Extracting embeddings${NC}"
-  python3 extract_embeddings.py --dataset-path $1
+  python3 helpers/extract_embeddings.py --dataset-path $1
 fi
 
 # Generate the .onyx files
-python3 generate_onyx.py --dataset-path $1
+echo -e "${NC}Generating .onnx files${NC}"
+python3 helpers/generate_onnx.py --dataset-path $1
 
 # Get the dataset directory name (e.g. 'dataset' from '/home/user/dataset')
 dataset_dir=$(basename $1)

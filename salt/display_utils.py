@@ -32,7 +32,6 @@ class DisplayUtils:
         poly = ann["segmentation"]
 
         for i, p in enumerate(poly):
-            # Print in non-science notation
             if isclose(p[0], 0, abs_tol=0.001) and isclose(p[1], 0, abs_tol=0.001) and min(p[2::2]) != 1:
                 # The model sometimes includes (0,0) despite not being included
                 poly[i] = poly[i][2:]

@@ -1,6 +1,9 @@
 import os
+import sys
 
 import numpy as np
+from termcolor import colored
+from tqdm import tqdm
 
 from salt.dataset_explorer import DatasetExplorer
 from salt.display_utils import DisplayUtils
@@ -47,6 +50,7 @@ class Editor:
         self.dataset_explorer = DatasetExplorer(
             self.dataset_path, categories=categories, coco_json_path=self.coco_json_path
         )
+
         self.curr_inputs = CurrentCapturedInputs()
         self.categories, self.category_colors = self.dataset_explorer.get_categories(
             get_colors=True
@@ -67,6 +71,10 @@ class Editor:
         )
         self.du = DisplayUtils()
         self.reset()
+
+        # Start a progress bar
+        self.progress_bar = tqdm(
+            total=self.dataset_explorer.get_num_images(), desc="Labeling", colour="green", unit="images", initial=1)
 
     def list_annotations(self):
         anns, colors = self.dataset_explorer.get_annotations(
@@ -147,7 +155,8 @@ class Editor:
 
     def next_image(self):
         if self.image_id == self.dataset_explorer.get_num_images() - 1:
-            return
+            print(colored("Done labeling!", "green"))
+            sys.exit(0)
         self.image_id += 1
         (
             self.image,
@@ -156,6 +165,9 @@ class Editor:
         ) = self.dataset_explorer.get_image_data(self.image_id)
         self.display = self.image_bgr.copy()
         self.onnx_helper.set_image_resolution(self.image.shape[1], self.image.shape[0])
+
+        self.progress_bar.update(1)
+
         self.reset()
 
     def prev_image(self):
@@ -169,6 +181,9 @@ class Editor:
         ) = self.dataset_explorer.get_image_data(self.image_id)
         self.display = self.image_bgr.copy()
         self.onnx_helper.set_image_resolution(self.image.shape[1], self.image.shape[0])
+
+        self.progress_bar.update(-1)
+
         self.reset()
 
     def next_category(self):

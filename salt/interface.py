@@ -123,12 +123,14 @@ class ApplicationInterface(QWidget):
         self.editor.save_ann()
         self.editor.reset(selected_annotations)
         self.graphics_view.imshow(self.editor.display)
+        self.save_all()
 
     def next_image(self):
         global selected_annotations
         self.editor.next_image()
         selected_annotations = []
         self.graphics_view.imshow(self.editor.display)
+        self.save_all()
 
     def prev_image(self):
         global selected_annotations

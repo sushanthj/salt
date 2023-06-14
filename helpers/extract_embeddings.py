@@ -18,6 +18,11 @@ def main(checkpoint_path, model_type, device, images_folder, embeddings_folder):
 
     for image_name in tqdm(os.listdir(images_folder)):
         image_path = os.path.join(images_folder, image_name)
+        out_path = os.path.join(embeddings_folder, os.path.splitext(image_name)[0] + ".npy")
+
+        if os.path.exists(out_path):
+            continue
+
         image = cv2.imread(image_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
@@ -25,7 +30,6 @@ def main(checkpoint_path, model_type, device, images_folder, embeddings_folder):
 
         image_embedding = predictor.get_image_embedding().cpu().numpy()
 
-        out_path = os.path.join(embeddings_folder, os.path.splitext(image_name)[0] + ".npy")
         np.save(out_path, image_embedding)
 
 

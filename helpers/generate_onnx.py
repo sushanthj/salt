@@ -3,18 +3,18 @@
 # This source code is licensed under the Apache-2.0 license found in the LICENSE file in the root directory of segment_anything repository and source tree.
 # Adapted from onnx_model_example.ipynb in the segment_anything repository.
 # Please see the original notebook for more details and other examples and additional usage.
-import warnings
-import os, shutil
 import argparse
-
-from segment_anything import sam_model_registry
-from segment_anything.utils.onnx import SamOnnxModel
-
-from onnxruntime.quantization import QuantType
-from onnxruntime.quantization.quantize import quantize_dynamic
+import os
+import shutil
+import warnings
 
 import cv2
 import torch
+from onnxruntime.quantization import QuantType
+from onnxruntime.quantization.quantize import quantize_dynamic
+from segment_anything import sam_model_registry
+from segment_anything.utils.onnx import SamOnnxModel
+from tqdm import tqdm
 
 
 def save_onnx_model(checkpoint, model_type, onnx_model_path, orig_im_size, opset_version, quantize=True):
@@ -84,8 +84,12 @@ def main(checkpoint_path, model_type, onnx_models_path, dataset_path, opset_vers
             cv2_im = cv2.imread(im_path)
             im_sizes.add(cv2_im.shape[:2])
 
-    for orig_im_size in im_sizes:
+    for orig_im_size in tqdm(im_sizes):
         onnx_model_path = os.path.join(onnx_models_path, f"sam_onnx.{orig_im_size[0]}_{orig_im_size[1]}.onnx")
+
+        if os.path.exists(onnx_model_path):
+            continue
+
         save_onnx_model(checkpoint_path, model_type, onnx_model_path, orig_im_size, opset_version, quantize)
 
 

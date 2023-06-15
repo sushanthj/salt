@@ -56,6 +56,11 @@ class Editor:
             get_colors=True
         )
         self.image_id = 0
+
+        if os.path.exists("progress.txt"):
+            with open("progress.txt", "r") as f:
+                self.image_id = int(f.read())
+
         self.category_id = 0
         self.show_other_anns = True
         (
@@ -81,6 +86,11 @@ class Editor:
             self.image_id, return_colors=True
         )
         return anns, colors
+
+    def write_progress(self):
+        # Write a text file with the progress
+        with open("progress.txt", "w") as f:
+            f.write(str(self.image_id))
 
     def delete_annotations(self, annotation_id):
         self.dataset_explorer.delete_annotations(self.image_id, annotation_id)
@@ -167,6 +177,7 @@ class Editor:
         self.onnx_helper.set_image_resolution(self.image.shape[1], self.image.shape[0])
 
         self.progress_bar.update(1)
+        self.write_progress()
 
         self.reset()
 
@@ -183,6 +194,7 @@ class Editor:
         self.onnx_helper.set_image_resolution(self.image.shape[1], self.image.shape[0])
 
         self.progress_bar.update(-1)
+        self.write_progress()
 
         self.reset()
 

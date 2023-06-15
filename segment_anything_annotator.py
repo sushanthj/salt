@@ -13,6 +13,7 @@ if __name__ == "__main__":
     parser.add_argument("--onnx-models-path", type=str, default="./models")
     parser.add_argument("--dataset-path", type=str, default="./dataset")
     parser.add_argument("--categories", type=str)
+    parser.add_argument("--from-start", type=bool, default=False, help="Start from the beginning of the dataset (if you've already started annotating)")
     args = parser.parse_args()
 
     onnx_models_path = args.onnx_models_path

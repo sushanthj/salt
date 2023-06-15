@@ -127,7 +127,7 @@ class DatasetExplorer:
             )
         except:
             self.global_annotation_id = 0
-        self.category_colors = distinctipy.get_colors(len(self.categories))
+        self.category_colors = distinctipy.get_colors(len(self.categories), exclude_colors=[(0, 1, 0)])
         self.category_colors = [
             tuple([int(255 * c) for c in color]) for color in self.category_colors
         ]

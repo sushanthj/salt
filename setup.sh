@@ -29,14 +29,12 @@ if [ ! -f "sam_vit_h_4b8939.pth" ]; then
   echo -e "${WARN}Please download the model file and place it in this directory. Or, if it is somewhere else (e.g. at /home/user/sam_vit_h_4b8939.pth), run ${NC}'ln -s /home/user/sam_vit_h_4b8939.pth .'${NC} while in this directory${NC}"
 fi
 
-# Extract the embeddings, if they don't exist already
-if [ ! -d "$1/embeddings" ]; then
-  echo -e "${NC}Extracting embeddings${NC}"
-  python3 helpers/extract_embeddings.py --dataset-path $1
-fi
+# Extract the embeddings
+echo -e "${NC}Extracting embeddings${NC}"
+python3 helpers/extract_embeddings.py --dataset-path $1
 
 # Generate the .onyx files
-echo -e "${NC}Generating .onnx files${NC}"
+echo -e "${NC}Generating .onnx file (should be quick)${NC}"
 python3 helpers/generate_onnx.py --dataset-path $1
 
 # Get the dataset directory name (e.g. 'dataset' from '/home/user/dataset')

@@ -57,9 +57,10 @@ class Editor:
         )
         self.image_id = 0
 
-        if os.path.exists("progress.txt"):
-            with open("progress.txt", "r") as f:
+        if os.path.exists(os.path.join(self.dataset_path, "progress.txt")):
+            with open(os.path.join(self.dataset_path, "progress.txt"), "r") as f:
                 self.image_id = int(f.read())
+                print('PROGRESS FILE FOUND. STARTING FROM IMAGE ID: {}'.format(self.image_id))
 
         self.category_id = 0
         self.show_other_anns = True

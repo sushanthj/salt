@@ -1,0 +1,8 @@
+simplification
+distinctipy
+termcolor
+urllib3
+chardet
+tqdm
+torch
+torchvision

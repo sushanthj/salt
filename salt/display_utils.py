@@ -39,13 +39,17 @@ class DisplayUtils:
                 # Delete this 2-pixel mask, or else it will be interpreted as a bbox
                 del poly[i]
 
-        rles = coco_mask.frPyObjects(poly, height, width)
-        rle = coco_mask.merge(rles)
-        mask_instance = coco_mask.decode(rle)
-        mask_instance = np.logical_not(mask_instance)
-        mask = np.logical_or(mask, mask_instance)
-        mask = np.logical_not(mask)
-        return mask
+        try:
+            rles = coco_mask.frPyObjects(poly, height, width)
+            rle = coco_mask.merge(rles)
+            mask_instance = coco_mask.decode(rle)
+            mask_instance = np.logical_not(mask_instance)
+            mask = np.logical_or(mask, mask_instance)
+            mask = np.logical_not(mask)
+            return mask
+        except:
+            print("Some error in bounding box")
+            return mask
 
     def draw_box_on_image(self, image, ann, color):
         x, y, w, h = ann["bbox"]

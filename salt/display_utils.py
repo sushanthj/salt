@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from pycocotools import mask as coco_mask
 from math import isclose
-
+import ipdb
 
 class DisplayUtils:
     def __init__(self):
@@ -31,13 +31,18 @@ class DisplayUtils:
         mask = np.zeros((height, width), dtype=np.uint8)
         poly = ann["segmentation"]
 
-        for i, p in enumerate(poly):
+        indices_to_delete = []
+        for i in range(len(poly)):
+            p = poly[i]
             if isclose(p[0], 0, abs_tol=0.001) and isclose(p[1], 0, abs_tol=0.001) and min(p[2::2]) != 1:
                 # The model sometimes includes (0,0) despite not being included
                 poly[i] = poly[i][2:]
             if len(p) <= 4:
                 # Delete this 2-pixel mask, or else it will be interpreted as a bbox
-                del poly[i]
+                indices_to_delete.append(i)
+
+        for i in reversed(indices_to_delete):
+            del poly[i]
 
         try:
             rles = coco_mask.frPyObjects(poly, height, width)
@@ -49,6 +54,7 @@ class DisplayUtils:
             return mask
         except:
             print("Some error in bounding box")
+            ipdb.set_trace()
             return mask
 
     def draw_box_on_image(self, image, ann, color):

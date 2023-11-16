@@ -22,6 +22,11 @@ There are a few keybindings that make the annotation process fast:
 7. [coco-viewer](https://github.com/trsvchn/coco-viewer) to view your annotations.
     - `python cocoviewer.py -i <dataset> -a <dataset>/annotations.json`
 
+
+## Detailed Usage
+
+Please refer to **README_supplement.md**
+
 ## Demo
 
 ![How it Works Gif!](https://github.com/anuragxel/salt/raw/main/assets/how-it-works.gif)

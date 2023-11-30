@@ -198,7 +198,7 @@ class Editor:
         self.display = self.image_bgr.copy()
         self.onnx_helper.set_image_resolution(self.image.shape[1], self.image.shape[0])
 
-        self.progress_bar.update(1)
+        self.progress_bar.update(int(progress)-1)
         self.write_progress()
 
         self.reset()

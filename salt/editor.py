@@ -182,6 +182,27 @@ class Editor:
 
         self.reset()
 
+    def fast_forward(self):
+        with open("progress.txt", "r") as f:
+            progress = f.readline()
+        self.image_id = int(progress)
+        if self.image_id == self.dataset_explorer.get_num_images() - 1:
+            print(colored("Done labeling!", "green"))
+            sys.exit(0)
+        self.image_id += 1
+        (
+            self.image,
+            self.image_bgr,
+            self.image_embedding,
+        ) = self.dataset_explorer.get_image_data(self.image_id)
+        self.display = self.image_bgr.copy()
+        self.onnx_helper.set_image_resolution(self.image.shape[1], self.image.shape[0])
+
+        self.progress_bar.update(1)
+        self.write_progress()
+
+        self.reset()
+
     def prev_image(self):
         if self.image_id == 0:
             return

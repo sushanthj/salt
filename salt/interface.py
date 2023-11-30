@@ -152,6 +152,12 @@ class ApplicationInterface(QWidget):
         self.editor.step_down_transparency(selected_annotations)
         self.graphics_view.imshow(self.editor.display)
 
+    def go_to_last_annotated_image(self):
+        global selected_annotations
+        self.editor.fast_forward()
+        selected_annotations = []
+        self.graphics_view.imshow(self.editor.display)
+
     def save_all(self):
         self.editor.save()
 
@@ -172,6 +178,7 @@ class ApplicationInterface(QWidget):
                 "Remove Selected Annotations",
                 lambda: self.delete_annotations(),
             ),
+            ("Go To Last annotated image", lambda: self.go_to_last_annotated_image()),
         ]
         for button, lmb in buttons:
             bt = QPushButton(button)
@@ -245,7 +252,7 @@ class ApplicationInterface(QWidget):
             self.transparency_down()
         if event.key() == Qt.Key_L:
             self.transparency_up()
-        if event.key() == Qt.Key_N:
+        if (event.key() == Qt.Key_N) or (event.key() == Qt.Key_F):
             self.add()
             self.get_side_panel_annotations()
         if event.key() == Qt.Key_R:

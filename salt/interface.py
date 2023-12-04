@@ -32,6 +32,7 @@ class CustomGraphicsView(QGraphicsView):
         self.setScene(self.scene)
 
         self.image_item = None
+        self.mode = 1
 
     def set_image(self, q_img):
         pixmap = QPixmap.fromImage(q_img)
@@ -63,6 +64,13 @@ class CustomGraphicsView(QGraphicsView):
         ).rgbSwapped()
         self.set_image(q_img)
 
+    def toggle_mode(self):
+        # if mode < 3 increment, else reset to 1
+        if self.mode >= 2:
+            self.mode = 1
+        else:
+            self.mode += 1
+
     def mousePressEvent(self, event: QMouseEvent) -> None:
         # FUTURE USE OF RIGHT CLICK EVENT IN THIS AREA
         modifiers = QApplication.keyboardModifiers()
@@ -77,7 +85,10 @@ class CustomGraphicsView(QGraphicsView):
                 label = 1
             elif event.button() == Qt.RightButton:
                 label = 0
-            self.editor.add_click([int(x), int(y)], label, selected_annotations)
+            if self.mode == 1:
+                self.editor.add_click([int(x), int(y)], label, selected_annotations)
+            elif self.mode == 2:
+                self.editor.add_click_mode_2([int(x), int(y)], label, selected_annotations)
         self.imshow(self.editor.display)
 
 
@@ -120,7 +131,7 @@ class ApplicationInterface(QWidget):
 
     def add(self):
         global selected_annotations
-        self.editor.save_ann()
+        self.editor.save_ann(self.graphics_view.mode)
         self.editor.reset(selected_annotations)
         self.graphics_view.imshow(self.editor.display)
         self.save_all()
@@ -158,6 +169,9 @@ class ApplicationInterface(QWidget):
         selected_annotations = []
         self.graphics_view.imshow(self.editor.display)
 
+    def toggle_modes(self):
+        self.graphics_view.toggle_mode()
+
     def save_all(self):
         self.editor.save()
 
@@ -179,6 +193,7 @@ class ApplicationInterface(QWidget):
                 lambda: self.delete_annotations(),
             ),
             ("Go To Last annotated image", lambda: self.go_to_last_annotated_image()),
+            ("Toggle Mode", lambda: self.toggle_modes())
         ]
         for button, lmb in buttons:
             bt = QPushButton(button)

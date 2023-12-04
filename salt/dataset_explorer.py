@@ -81,6 +81,7 @@ def parse_mask_to_coco(image_id, anno_id, image_mask, category_id, poly=False):
         "area": float(width * height),
         "iscrowd": 0,
         "segmentation": [],
+        "keypoints": [],
     }
     if poly is False:
         annotation["segmentation"] = encoded_mask
@@ -92,6 +93,59 @@ def parse_mask_to_coco(image_id, anno_id, image_mask, category_id, poly=False):
             sc = simplify_coords_vwp(contour[:,0,:], 2).ravel().tolist()
             annotation["segmentation"].append(sc)
     return annotation
+
+
+def parse_mask_to_coco_mode_2(image_id, anno_id, image_mask,
+                              category_id, input_poitns, lane_width, poly=True):
+    start_anno_id = anno_id
+    x, y, width, height = bounding_box_from_mask(image_mask)
+    annotation = {
+        "id": start_anno_id,
+        "image_id": image_id,
+        "category_id": category_id,
+        "bbox": [float(x), float(y), float(width), float(height)],
+        "area": float(width * height),
+        "iscrowd": 0,
+        "segmentation": [],
+        "keypoints": [],
+    }
+    # use the input points to get the contours directly as done in editor.add_click_mode_2
+    for i in range(0, input_poitns.shape[0] - 1, 2):
+        x1, y1 = input_poitns[i]
+        x2, y2 = input_poitns[i+1]
+        # Get the polygon vertices
+        x1 = int(x1)
+        y1 = int(y1)
+        x2 = int(x2)
+        y2 = int(y2)
+        polygon_vertices = [
+            x1 - lane_width, y1,
+            x1, y1,
+            x1 + lane_width, y1,
+            x2 + lane_width, y2,
+            x2, y2,
+            x2 - lane_width, y2,
+            x1 - lane_width, y1,
+        ]
+        annotation["segmentation"].append(polygon_vertices)
+    return annotation
+
+def add_keypoints_to_annotation(annotation, input_points):
+        """
+        input_points[0] = (x1,y1)
+        input_points[1] = (x2,y2)
+        """
+        # for every pair of (x1,y1) and (x2,y2), interpolate to find 10 points in between
+        # then, add these points to the annotation
+        lanes = []
+        for i in range(input_points.shape[0]):
+            x1, y1 = input_points[i]
+            lanes.append(int(x1))
+            lanes.append(int(y1))
+            lanes.append(2) # x,y,visibility
+
+        annotation["keypoints"] = lanes
+        return annotation
 
 
 class DatasetExplorer:
@@ -192,12 +246,19 @@ class DatasetExplorer:
                 self.annotations_by_image_id[image_id].remove(annotation)
                 break
 
-    def add_annotation(self, image_id, category_id, mask, poly=True):
+    def add_annotation(self, image_id, category_id, mask,
+                       input_points, mode, lane_width, poly=True):
         if mask is None:
             return
-        annotation = parse_mask_to_coco(
-            image_id, self.global_annotation_id, mask, category_id, poly=poly
-        )
+        if mode == 1:
+            annotation = parse_mask_to_coco(
+                image_id, self.global_annotation_id, mask, category_id, poly=poly
+            )
+        elif mode == 2:
+            annotation = parse_mask_to_coco_mode_2(
+                image_id, self.global_annotation_id,
+                mask, category_id, input_points, lane_width, poly=poly
+            )
         self.__add_to_our_annotation_dict(annotation)
         self.coco_json["annotations"].append(annotation)
         self.global_annotation_id += 1

@@ -4,6 +4,7 @@ import sys
 import numpy as np
 from termcolor import colored
 from tqdm import tqdm
+import cv2
 
 from salt.dataset_explorer import DatasetExplorer
 from salt.display_utils import DisplayUtils
@@ -56,6 +57,7 @@ class Editor:
             get_colors=True
         )
         self.image_id = 0
+        self.mode_2_lane_width = 16
 
         if os.path.exists(os.path.join(self.dataset_path, "progress.txt")):
             with open(os.path.join(self.dataset_path, "progress.txt"), "r") as f:
@@ -132,6 +134,56 @@ class Editor:
         self.curr_inputs.set_low_res_logits(low_res_logits)
         self.__draw(selected_annotations)
 
+    def add_click_mode_2(self, new_pt, new_label, selected_annotations=[]):
+        """
+        In this mode, we need to store in memory the first clicked point
+        and when second point is clicked we need to use these two points
+        as start and end points to draw a polygon.
+
+        If the points clicked are (x1,y1) and (x2,y2) then the polygon
+        will be constructed using the vertices (x1-5,y1), (x1,y1), (x1+5,y1),
+        (x2+5,y2), (x2,y2), (x2-5,y2)
+
+        The above polygon will be saved as a mask similar to the add_click
+        function where a mask is obtained from the onnx model.
+        """
+        self.curr_inputs.add_input_click(new_pt, new_label)
+
+        if len(self.curr_inputs.input_point) % 2 == 0:
+            # Get the first point
+            first_pt = self.curr_inputs.input_point[-1]
+
+            # Get the second point
+            second_pt = self.curr_inputs.input_point[-2]
+
+            # Get the polygon vertices
+            x1, y1 = first_pt
+            x2, y2 = second_pt
+            x1 = int(x1)
+            y1 = int(y1)
+            x2 = int(x2)
+            y2 = int(y2)
+            polygon_vertices = [
+                (x1 - self.mode_2_lane_width, y1),
+                (x1, y1),
+                (x1 + self.mode_2_lane_width, y1),
+                (x2 + self.mode_2_lane_width, y2),
+                (x2, y2),
+                (x2 - self.mode_2_lane_width, y2),
+                (x1 - self.mode_2_lane_width, y1), # Add the first point again to close the polygon
+            ]
+            polygon_vertices_np = np.array([polygon_vertices], dtype=np.int32)
+
+            # we need mask to be of shape = (H,W) and only the polygon region to be False and
+            # rest of the image to be True
+            # create empty mask
+            mask = np.zeros((self.image.shape[0], self.image.shape[1]), dtype=np.uint8)
+            # fill mask with polygon
+            mask = cv2.fillPoly(mask, polygon_vertices_np, 255)
+            mask = np.array(mask, dtype=bool)
+            self.curr_inputs.set_mask(mask)
+            self.__draw(selected_annotations)
+
     def remove_click(self, new_pt):
         print("ran remove click")
 
@@ -156,9 +208,12 @@ class Editor:
     def draw_selected_annotations(self, selected_annotations=[]):
         self.__draw(selected_annotations)
 
-    def save_ann(self):
+    def save_ann(self, mode=1):
+        print("current mask is ", self.curr_inputs.curr_mask.shape)
         self.dataset_explorer.add_annotation(
-            self.image_id, self.category_id, self.curr_inputs.curr_mask
+            self.image_id, self.category_id,
+            self.curr_inputs.curr_mask, self.curr_inputs.input_point,
+            mode, self.mode_2_lane_width
         )
 
     def save(self):

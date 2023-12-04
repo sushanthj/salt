@@ -186,10 +186,10 @@ class Editor:
         with open("progress.txt", "r") as f:
             progress = f.readline()
         self.image_id = int(progress)
+        completion = int(progress) - 1
         if self.image_id == self.dataset_explorer.get_num_images() - 1:
             print(colored("Done labeling!", "green"))
             sys.exit(0)
-        self.image_id += 1
         (
             self.image,
             self.image_bgr,
@@ -198,7 +198,8 @@ class Editor:
         self.display = self.image_bgr.copy()
         self.onnx_helper.set_image_resolution(self.image.shape[1], self.image.shape[0])
 
-        self.progress_bar.update(int(progress)-1)
+        percentage_completion = completion // self.dataset_explorer.get_num_images()
+        self.progress_bar.update(percentage_completion)
         self.write_progress()
 
         self.reset()
